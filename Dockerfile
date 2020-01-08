@@ -1,5 +1,5 @@
 # Swift plugin
-FROM swift:5.1 as swift-plugin
+FROM swift:5.1 as swift-builder
 
 ENV SWIFT_VERSION "1.7.0"
 
@@ -10,9 +10,31 @@ RUN apt-get -q update && \
 
 RUN curl -L -o plugin.zip https://github.com/apple/swift-protobuf/archive/$SWIFT_VERSION.zip && \
   unzip plugin.zip -d ./plugin && \
-  cd plugin/swift-protobuf-$SWIFT_VERSION && swift build --static-swift-stdlib -c release
+  cd plugin/swift-protobuf-$SWIFT_VERSION && swift build -c release
 
 RUN cp plugin/swift-protobuf-$SWIFT_VERSION/.build/x86_64-unknown-linux/release/protoc-gen-swift /usr/local/bin/protoc-gen-swift
+
+FROM scratch AS swift-plugin
+COPY --from=swift-builder /usr/local/bin/protoc-gen-swift /usr/local/bin/protoc-gen-swift
+COPY --from=swift-builder /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu/libc.so.6
+COPY --from=swift-builder /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so.2
+COPY --from=swift-builder /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so.1
+COPY --from=swift-builder /lib/x86_64-linux-gnu/libm.so.6 /lib/x86_64-linux-gnu/libm.so.6
+COPY --from=swift-builder /lib/x86_64-linux-gnu/libpthread.so.0 /lib/x86_64-linux-gnu/libpthread.so.0
+COPY --from=swift-builder /lib/x86_64-linux-gnu/librt.so.1 /lib/x86_64-linux-gnu/librt.so.1
+COPY --from=swift-builder /lib/x86_64-linux-gnu/libutil.so.1 /lib/x86_64-linux-gnu/libutil.so.1
+COPY --from=swift-builder /lib64/ld-linux-x86-64.so.2 /lib64/ld-linux-x86-64.so.2
+COPY --from=swift-builder /usr/lib/swift/linux/libBlocksRuntime.so /usr/lib/swift/linux/libBlocksRuntime.so
+COPY --from=swift-builder /usr/lib/swift/linux/libdispatch.so /usr/lib/swift/linux/libdispatch.so
+COPY --from=swift-builder /usr/lib/swift/linux/libFoundation.so /usr/lib/swift/linux/libFoundation.so
+COPY --from=swift-builder /usr/lib/swift/linux/libicudataswift.so.61 /usr/lib/swift/linux/libicudataswift.so.61
+COPY --from=swift-builder /usr/lib/swift/linux/libicui18nswift.so.61 /usr/lib/swift/linux/libicui18nswift.so.61
+COPY --from=swift-builder /usr/lib/swift/linux/libicuucswift.so.61 /usr/lib/swift/linux/libicuucswift.so.61
+COPY --from=swift-builder /usr/lib/swift/linux/libswiftCore.so /usr/lib/swift/linux/libswiftCore.so
+COPY --from=swift-builder /usr/lib/swift/linux/libswiftDispatch.so /usr/lib/swift/linux/libswiftDispatch.so
+COPY --from=swift-builder /usr/lib/swift/linux/libswiftGlibc.so /usr/lib/swift/linux/libswiftGlibc.so
+COPY --from=swift-builder /usr/lib/x86_64-linux-gnu/libatomic.so.1 /usr/lib/x86_64-linux-gnu/libatomic.so.1
+COPY --from=swift-builder /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
 
 # Kotlin plugin
 FROM ubuntu:16.04 as kotlin-plugin
@@ -54,6 +76,7 @@ RUN apk add --update --no-cache make openjdk8-jre && \
   rm -rf /var/cache/apk/*
 
 COPY --from=swift-plugin /usr/local/bin/protoc-gen-swift /usr/local/bin/
+COPY --from=swift-plugin / /
 COPY --from=kotlin-plugin ./protoc-gen-kotlin/bin/protoc-gen-kotlin /usr/local/bin
 COPY --from=kotlin-plugin ./protoc-gen-kotlin/bin/protoc-gen-kotlin.bat /usr/local/bin
 COPY --from=kotlin-plugin ./protoc-gen-kotlin/lib /usr/local/lib/
