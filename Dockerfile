@@ -1,18 +1,18 @@
 # Swift plugin
 FROM swift:5.1 as swift-builder
 
-ENV SWIFT_VERSION "1.7.0"
+ENV SWIFT_PLUGIN_VERSION "1.7.0"
 
 RUN apt-get -q update && \
     apt-get -q install -y \
     unzip curl \
     && rm -r /var/lib/apt/lists/*
 
-RUN curl -L -o plugin.zip https://github.com/apple/swift-protobuf/archive/$SWIFT_VERSION.zip && \
+RUN curl -L -o plugin.zip https://github.com/apple/swift-protobuf/archive/$SWIFT_PLUGIN_VERSION.zip && \
   unzip plugin.zip -d ./plugin && \
-  cd plugin/swift-protobuf-$SWIFT_VERSION && swift build -c release
+  cd plugin/swift-protobuf-$SWIFT_PLUGIN_VERSION && swift build -c release
 
-RUN cp plugin/swift-protobuf-$SWIFT_VERSION/.build/x86_64-unknown-linux/release/protoc-gen-swift /usr/local/bin/protoc-gen-swift
+RUN cp plugin/swift-protobuf-$SWIFT_PLUGIN_VERSION/.build/x86_64-unknown-linux/release/protoc-gen-swift /usr/local/bin/protoc-gen-swift
 
 FROM scratch AS swift-plugin
 COPY --from=swift-builder /usr/local/bin/protoc-gen-swift /usr/local/bin/protoc-gen-swift
@@ -39,18 +39,14 @@ COPY --from=swift-builder /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_
 # Kotlin plugin
 FROM openjdk:8 as kotlin-plugin
 
-ENV KOTLIN_VERSION "0.7.2"
+ENV KOTLIN_PLUGIN_VERSION "0.7.2"
 
 RUN apt-get update && \
     apt-get -y install curl zip
-RUN curl -LO https://github.com/streem/pbandk/archive/v$KOTLIN_VERSION.zip && unzip -o v$KOTLIN_VERSION.zip
+RUN curl -LO https://github.com/streem/pbandk/archive/v$KOTLIN_PLUGIN_VERSION.zip && unzip -o v$KOTLIN_PLUGIN_VERSION.zip
 
-RUN cd pbandk-$KOTLIN_VERSION && ./gradlew :protoc-gen-kotlin:protoc-gen-kotlin-jvm:assembleDist
-RUN unzip pbandk-$KOTLIN_VERSION/protoc-gen-kotlin/protoc-gen-kotlin-jvm/build/distributions/protoc-gen-kotlin-$KOTLIN_VERSION.zip
-
-RUN mkdir -p ./protoc-gen-kotlin/bin/ ./protoc-gen-kotlin/lib/
-RUN cp -r ./protoc-gen-kotlin-$KOTLIN_VERSION/bin/ ./protoc-gen-kotlin/
-RUN cp -r ./protoc-gen-kotlin-$KOTLIN_VERSION/lib/ ./protoc-gen-kotlin/
+RUN cd pbandk-$KOTLIN_PLUGIN_VERSION && ./gradlew :protoc-gen-kotlin:protoc-gen-kotlin-jvm:assembleDist
+RUN unzip pbandk-$KOTLIN_PLUGIN_VERSION/protoc-gen-kotlin/protoc-gen-kotlin-jvm/build/distributions/protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION.zip
 
 
 # Go plugin
@@ -63,12 +59,12 @@ RUN go build -o /usr/local/bin/protoc-gen-go github.com/golang/protobuf/protoc-g
 # Scala plugin
 FROM ubuntu:16.04 as scala-plugin
 
-ENV SCALA_VERSION "0.9.6"
+ENV SCALA_PLUGIN_VERSION "0.9.6"
 
 RUN apt-get update && \
     apt-get -y install curl zip
 
-RUN curl -LO https://github.com/scalapb/ScalaPB/releases/download/v$SCALA_VERSION/protoc-gen-scala-$SCALA_VERSION-linux-x86_64.zip && unzip -o protoc-gen-scala-$SCALA_VERSION-linux-x86_64.zip
+RUN curl -LO https://github.com/scalapb/ScalaPB/releases/download/v$SCALA_PLUGIN_VERSION/protoc-gen-scala-$SCALA_PLUGIN_VERSION-linux-x86_64.zip && unzip -o protoc-gen-scala-$SCALA_PLUGIN_VERSION-linux-x86_64.zip
 RUN cp ./protoc-gen-scala /usr/local/bin/
 
 
