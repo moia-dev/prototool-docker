@@ -1,6 +1,0 @@
-# action.yaml
-name: 'test Docker image'
-description: 'builds the docker image in this repository and test it'
-runs:
-  using: 'docker'
-  image: 'Dockerfile'

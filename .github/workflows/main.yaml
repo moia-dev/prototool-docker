@@ -12,7 +12,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: build image
-      uses: ./action.yaml # Uses an action in the root directory
+      run:
+        - docker build . --file Dockerfile
   generate_test_files:
     runs-on: ubuntu-latest
     name: build the test files
@@ -25,6 +26,8 @@ jobs:
         repository: 'moia-dev/api'
         ref: 'master'
         path: 'test_files'
-    - name:
-      uses: ./test_action.yaml
+    - name: Build the Docker image
+      run: 
+        - docker build . --file Dockerfile --tag moia/prototool:test
+        - docker run -v $(pwd)/test_files:/work/test_files moia/prototool:test prototool generate test_files
 

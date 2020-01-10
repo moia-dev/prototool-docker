@@ -1,6 +1,0 @@
-# action.yaml
-name: 'build image'
-description: 'builds the docker image in this repository'
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
