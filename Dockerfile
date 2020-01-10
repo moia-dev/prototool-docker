@@ -37,17 +37,16 @@ COPY --from=swift-builder /usr/lib/x86_64-linux-gnu/libatomic.so.1 /usr/lib/x86_
 COPY --from=swift-builder /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
 
 # Kotlin plugin
-FROM ubuntu:16.04 as kotlin-plugin
+FROM openjdk:8 as kotlin-plugin
 
-ENV KOTLIN_PLUGIN_VERSION "0.3.0"
+ENV KOTLIN_PLUGIN_VERSION "0.7.2"
 
 RUN apt-get update && \
     apt-get -y install curl zip
-RUN curl -LO https://github.com/cretz/pb-and-k/releases/download/v$KOTLIN_PLUGIN_VERSION/protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION.zip && unzip -o protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION.zip
+RUN curl -LO https://github.com/streem/pbandk/archive/v$KOTLIN_PLUGIN_VERSION.zip && unzip -o v$KOTLIN_PLUGIN_VERSION.zip
 
-RUN mkdir -p ./protoc-gen-kotlin/bin/ ./protoc-gen-kotlin/lib/
-RUN cp -r ./protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION/bin/ ./protoc-gen-kotlin/
-RUN cp -r ./protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION/lib/ ./protoc-gen-kotlin/
+RUN cd pbandk-$KOTLIN_PLUGIN_VERSION && ./gradlew :protoc-gen-kotlin:protoc-gen-kotlin-jvm:assembleDist
+RUN unzip pbandk-$KOTLIN_PLUGIN_VERSION/protoc-gen-kotlin/protoc-gen-kotlin-jvm/build/distributions/protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION.zip
 
 
 # Go plugin
