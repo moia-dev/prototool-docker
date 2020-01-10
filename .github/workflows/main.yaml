@@ -4,11 +4,27 @@ on:
       - master
 
 jobs:
-  generate_test_files:
+  build_image:
     runs-on: ubuntu-latest
-    name: Generate artefacts from test files
+    name: build the Docker image
     steps:
     # To use this repository's private action, you must check out the repository
     - name: Checkout
       uses: actions/checkout@v1
-    - uses: ./ # Uses an action in the root directory
+    - name: build image
+      uses: ./action.yaml # Uses an action in the root directory
+  generate_test_files:
+    runs-on: ubuntu-latest
+    name: build the test files
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Checkout MOIA proto files
+      uses: actions/checkout@v2
+      with:
+        repository: 'moia-dev/api'
+        ref: 'master'
+        path: 'test_files'
+    - name:
+      uses: ./test_action.yaml
+
