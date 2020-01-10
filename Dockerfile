@@ -46,7 +46,7 @@ RUN apt-get update && \
 RUN curl -LO https://github.com/streem/pbandk/archive/v$KOTLIN_VERSION.zip && unzip -o v$KOTLIN_VERSION.zip
 
 RUN cd pbandk-$KOTLIN_VERSION && ./gradlew :protoc-gen-kotlin:protoc-gen-kotlin-jvm:assembleDist
-RUN unzip pbandk-0.7.2/protoc-gen-kotlin/protoc-gen-kotlin-jvm/build/distributions/protoc-gen-kotlin-0.7.2.zip
+RUN unzip pbandk-$KOTLIN_VERSION/protoc-gen-kotlin/protoc-gen-kotlin-jvm/build/distributions/protoc-gen-kotlin-$KOTLIN_VERSION.zip
 
 RUN mkdir -p ./protoc-gen-kotlin/bin/ ./protoc-gen-kotlin/lib/
 RUN cp -r ./protoc-gen-kotlin-$KOTLIN_VERSION/bin/ ./protoc-gen-kotlin/
