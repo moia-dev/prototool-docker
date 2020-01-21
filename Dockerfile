@@ -48,6 +48,9 @@ RUN curl -LO https://github.com/streem/pbandk/archive/v$KOTLIN_PLUGIN_VERSION.zi
 RUN cd pbandk-$KOTLIN_PLUGIN_VERSION && ./gradlew :protoc-gen-kotlin:protoc-gen-kotlin-jvm:assembleDist
 RUN unzip pbandk-$KOTLIN_PLUGIN_VERSION/protoc-gen-kotlin/protoc-gen-kotlin-jvm/build/distributions/protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION.zip
 
+RUN mkdir -p ./protoc-gen-kotlin/bin/ ./protoc-gen-kotlin/lib/
+RUN cp -r ./protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION/bin/ ./protoc-gen-kotlin/
+RUN cp -r ./protoc-gen-kotlin-$KOTLIN_PLUGIN_VERSION/lib/ ./protoc-gen-kotlin/
 
 # Go plugin
 FROM golang:1.13 as go-plugin
@@ -76,8 +79,7 @@ RUN apk add --update --no-cache make openjdk8-jre && \
 
 COPY --from=swift-plugin /usr/local/bin/protoc-gen-swift /usr/local/bin/
 COPY --from=swift-plugin / /
-COPY --from=kotlin-plugin ./protoc-gen-kotlin/bin/protoc-gen-kotlin /usr/local/bin
-COPY --from=kotlin-plugin ./protoc-gen-kotlin/bin/protoc-gen-kotlin.bat /usr/local/bin
+COPY --from=kotlin-plugin ./protoc-gen-kotlin/bin/protoc-gen-kotlin /usr/local/bin/
 COPY --from=kotlin-plugin ./protoc-gen-kotlin/lib /usr/local/lib/
 COPY --from=go-plugin /usr/local/bin/protoc-gen-go /usr/local/bin/
 COPY --from=scala-plugin /usr/local/bin/protoc-gen-scala /usr/local/bin/
